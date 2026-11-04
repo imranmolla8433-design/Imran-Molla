@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>My Saving Tracker — মাই সেভিং ট্র্যাকার (Web App)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-navy: #070D1B;
+      --surface-navy: #0E1A32;
+      --surface-elevated: #152546;
+      --surface-highlight: #1B3058;
+      --border-navy: #223B6E;
+      --blue-primary: #3B82F6;
+      --blue-dark: #1D4ED8;
+      --cyan-accent: #38BDF8;
+      --paid-green: #10B981;
+      --paid-light: #34D399;
+      --paid-bg: #063225;
+      --due-red: #EF4444;
+      --due-light: #F87171;
+      --due-bg: #35131B;
+      --gold: #FBBF24;
+      --text-white: #F8FAFC;
+      --text-slate: #94A3B8;
+      --text-muted: #64748B;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-navy);
+      background-image: radial-gradient(circle at 15% 10%, rgba(59,130,246,0.12), transparent 35%),
+                        radial-gradient(circle at 85% 90%, rgba(16,185,129,0.08), transparent 35%);
+      color: var(--text-white);
+      font-family: 'Hind Siliguri', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      line-height: 1.5;
+      padding: 16px;
+      min-height: 100vh;
+    }
+    .container { max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+
+    /* Hero Header */
+    .hero-card {
+      background: linear-gradient(135deg, #091326 0%, #132854 60%, #0F2942 100%);
+      border: 1px solid var(--border-navy);
+      border-radius: 22px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.45);
+    }
+    .hero-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-row { display: flex; align-items: center; gap: 12px; }
+    .brand-icon {
+      width: 48px; height: 48px;
+      border-radius: 14px;
+      background: rgba(29, 78, 216, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.45rem;
+    }
+    .hero-title h1 { font-size: 1.45rem; font-weight: 800; color: var(--text-white); letter-spacing: -0.01em; }
+    .hero-title p { color: var(--cyan-accent); font-size: 0.9rem; font-weight: 500; }
+
+    /* Sync Bar */
+    .sync-bar {
+      background: rgba(7, 16, 34, 0.85);
+      border: 1px solid var(--border-navy);
+      border-radius: 14px;
+      padding: 10px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .user-info { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; }
+    .user-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--paid-green); }
+    .sync-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+    }
+    .sync-pill.synced { background: rgba(16,185,129,0.16); color: var(--paid-light); border-color: rgba(16,185,129,0.45); }
+    .sync-pill.syncing { background: rgba(56,189,248,0.16); color: var(--cyan-accent); border-color: rgba(56,189,248,0.45); }
+    .sync-pill.failed { background: rgba(239,68,68,0.16); color: var(--due-light); border-color: rgba(239,68,68,0.45); cursor: pointer; }
+
+    .plan-pill-row {
+      background: rgba(7, 16, 34, 0.72);
+      border: 1px solid var(--border-navy);
+      border-radius: 12px;
+      padding: 8px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+    }
+    .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: var(--blue-primary); color: #fff; }
+    .btn-outline { background: rgba(21,37,70,0.85); color: var(--text-white); border: 1px solid var(--cyan-accent); }
+    .btn-danger { background: rgba(239,68,68,0.16); color: var(--due-light); border: 1px solid var(--due-red); }
+    .btn-success { background: var(--paid-green); color: #041E16; }
+
+    /* Status Toast */
+    .toast-banner {
+      display: none;
+      background: var(--surface-elevated);
+      border: 1px solid var(--cyan-accent);
+      color: var(--paid-light);
+      padding: 10px 16px;
+      border-radius: 14px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      animation: fadeIn 0.25s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Dashboard Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(205px, 1fr));
+      gap: 12px;
+    }
+    .stat-card {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-navy);
+      border-radius: 18px;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card .label-bn { font-size: 0.95rem; font-weight: 700; color: var(--text-white); }
+    .stat-card .label-en { font-size: 0.75rem; color: var(--text-slate); }
+    .stat-card .val { font-size: 1.5rem; font-weight: 800; margin-top: 8px; }
+    .stat-card .sub { font-size: 0.78rem; color: var(--text-slate); margin-top: 4px; }
+
+    .progress-card {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-navy);
+      border-radius: 18px;
+      padding: 16px;
+    }
+    .progress-track {
+      width: 100%;
+      height: 14px;
+      background: #091326;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 10px 0;
+      border: 1px solid var(--border-navy);
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--blue-primary), var(--cyan-accent), var(--paid-green));
+      border-radius: 999px;
+      transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* Main 2-Column Layout */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 18px;
+      align-items: start;
+    }
+    @media (max-width: 860px) { .main-grid { grid-template-columns: 1fr; } }
+
+    .panel {
+      background: var(--surface-navy);
+      border: 1px solid var(--border-navy);
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+
+    /* Month Chips */
+    .month-chips {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-top: 12px;
+      scrollbar-width: thin;
+    }
+    .month-chip {
+      border: 1px solid var(--border-navy);
+      background: var(--surface-elevated);
+      color: var(--text-slate);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      font-family: inherit;
+    }
+    .month-chip.active {
+      background: var(--blue-primary);
+      color: #fff;
+      border-color: var(--cyan-accent);
+      font-weight: 700;
+    }
+
+    /* Calendar Navigation */
+    .cal-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-navy);
+      border-radius: 14px;
+      padding: 8px 12px;
+      margin: 12px 0;
+    }
+    .cal-nav button {
+      background: var(--surface-highlight);
+      color: var(--text-white);
+      border: 1px solid var(--border-navy);
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+    .cal-nav button:disabled { opacity: 0.35; cursor: not-allowed; }
+    .legend-row {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 0.8rem;
+      color: var(--text-slate);
+    }
+    .legend-dot {
+      display: inline-block;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+
+    /* Calendar Grid */
+    .weekdays, .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+    .weekday {
+      background: var(--bg-navy);
+      border-radius: 8px;
+      padding: 6px 2px;
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--cyan-accent);
+      font-weight: 700;
+    }
+    .day-cell {
+      min-height: 72px;
+      border-radius: 12px;
+      padding: 6px 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      text-align: center;
+      user-select: none;
+      position: relative;
+      transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+    .day-odd {
+      background: rgba(7, 13, 27, 0.65);
+      border: 1px solid rgba(34, 59, 110, 0.45);
+      color: var(--text-muted);
+      cursor: default;
+    }
+    .day-due {
+      background: var(--due-bg);
+      border: 1.5px solid var(--due-red);
+      color: var(--text-white);
+      cursor: pointer;
+    }
+    .day-paid {
+      background: var(--paid-bg);
+      border: 1.5px solid var(--paid-green);
+      color: var(--text-white);
+      cursor: pointer;
+    }
+    .day-due:hover, .day-paid:hover { transform: translateY(-2px); }
+    .day-num { font-weight: 700; font-size: 0.88rem; display: flex; align-items: center; gap: 3px; }
+    .day-amt { font-size: 0.74rem; font-weight: 700; }
+    .badge {
+      font-size: 0.64rem;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+    .badge-due { background: rgba(239,68,68,0.28); color: #F87171; }
+    .badge-paid { background: rgba(16,185,129,0.28); color: #34D399; }
+    .note-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      display: inline-block;
+    }
+    .note-mini-btn {
+      position: absolute;
+      top: 3px;
+      right: 3px;
+      background: rgba(14,26,50,0.75);
+      border: none;
+      color: var(--gold);
+      font-size: 0.62rem;
+      border-radius: 4px;
+      padding: 1px 3px;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    /* Notes List Box */
+    .notes-box {
+      margin-top: 14px;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-navy);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .note-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(7,13,27,0.6);
+      padding: 6px 10px;
+      border-radius: 8px;
+      margin-top: 6px;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+
+    /* Monthly Report Table */
+    .report-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-navy);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+    .summary-table-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: var(--bg-navy);
+      border: 1px solid var(--border-navy);
+      margin-bottom: 6px;
+      cursor: pointer;
+      font-size: 0.84rem;
+    }
+    .summary-table-row.active {
+      background: var(--surface-highlight);
+      border-color: var(--cyan-accent);
+    }
+
+    /* Modals */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.76);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+      backdrop-filter: blur(4px);
+    }
+    .modal {
+      background: var(--surface-navy);
+      border: 1px solid var(--border-navy);
+      border-radius: 22px;
+      max-width: 460px;
+      width: 100%;
+      padding: 22px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    }
+    .auth-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      background: var(--bg-navy);
+      padding: 5px;
+      border-radius: 12px;
+      margin: 14px 0;
+    }
+    .auth-tab {
+      background: transparent;
+      border: none;
+      color: var(--text-slate);
+      padding: 8px 4px;
+      border-radius: 9px;
+      font-weight: 700;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .auth-tab.active {
+      background: var(--blue-primary);
+      color: #fff;
+    }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 0.82rem; color: var(--text-slate); margin-bottom: 4px; font-weight: 600; }
+    .form-input {
+      width: 100%;
+      background: var(--bg-navy);
+      border: 1px solid var(--border-navy);
+      color: var(--text-white);
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 0.92rem;
+      font-family: inherit;
+    }
+    .form-input:focus { outline: none; border-color: var(--cyan-accent); }
+    .remember-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--text-slate);
+      margin: 8px 0 14px;
+    }
+    .auth-feedback {
+      display: none;
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 0.83rem;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    .auth-feedback.error { display: block; background: rgba(239,68,68,0.16); border: 1px solid var(--due-red); color: var(--due-light); }
+    .auth-feedback.success { display: block; background: rgba(16,185,129,0.16); border: 1px solid var(--paid-green); color: var(--paid-light); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Hero Header -->
+    <header class="hero-card">
+      <div class="hero-top">
+        <div class="brand-row">
+          <div class="brand-icon">💰</div>
+          <div class="hero-title">
+            <h1>My Saving Tracker</h1>
+            <p>মাই সেভিং ট্র্যাকার • ওয়েব ড্যাশবোর্ড ও ক্লাউড সিঙ্ক</p>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-outline" id="authHeaderBtn">🔐 অ্যাকাউন্ট / ক্লাউড লগইন</button>
+        </div>
+      </div>
+
+      <!-- Cloud Sync & User Status Bar -->
+      <div class="sync-bar">
+        <div class="user-info">
+          <span class="user-dot" id="userStatusDot"></span>
+          <span id="userStatusText">লোকাল ব্যাকআপ মোড (ক্লাউড সিঙ্ক করতে লগইন করুন)</span>
+        </div>
+        <div class="sync-pill synced" id="syncStatusPill" title="ক্লাউড সিঙ্ক স্ট্যাটাস">
+          <span id="syncStatusLabel">✓ লোকাল সংরক্ষিত</span>
+        </div>
+      </div>
+
+      <!-- Plan Period Banner -->
+      <div class="plan-pill-row">
+        <span>📅 <strong>১ ডিসেম্বর ২০২৬ – ৩০ জুন ২০২৭</strong> (প্রতি জোড় তারিখে ₹100 সঞ্চয়)</span>
+        <span style="color:var(--gold); font-weight:700;">মোট ১০৪ দিন • লক্ষ্য ₹10,400</span>
+      </div>
+
+      <!-- Primary Actions -->
+      <div class="hero-actions">
+        <button class="btn btn-primary" id="exportCsvBtn">⬇ CSV এক্সপোর্ট</button>
+        <button class="btn btn-outline" id="addQuickNoteBtn">📝 লেনদেনের নোট</button>
+        <button class="btn btn-danger" id="resetAllBtn">↺ সব ডেটা রিসেট</button>
+      </div>
+    </header>
+
+    <!-- Status Toast -->
+    <div class="toast-banner" id="toastBanner">
+      <span id="toastMessage"></span>
+      <button class="btn" style="padding:4px 10px; background:transparent; color:var(--text-white);" id="closeToastBtn">✕</button>
+    </div>
+
+    <!-- Dashboard 6 Statistics Cards + Animated Progress Bar -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="label-bn">১. মোট লক্ষ্যমাত্রা</div>
+        <div class="label-en">Total Target</div>
+        <div class="val" style="color:var(--cyan-accent);">₹10,400</div>
+        <div class="sub">১০৪টি জোড় সঞ্চয় দিন × ₹100</div>
+      </div>
+      <div class="stat-card">
+        <div class="label-bn">২. মোট জমা হয়েছে</div>
+        <div class="label-en">Total Saved</div>
+        <div class="val" id="statTotalSaved" style="color:var(--paid-green);">₹0</div>
+        <div class="sub" id="statPaidDaysSub">০টি দিন সম্পন্ন (PAID)</div>
+      </div>
+      <div class="stat-card">
+        <div class="label-bn">৩. বাকি টাকার পরিমাণ</div>
+        <div class="label-en">Remaining Amount</div>
+        <div class="val" id="statRemaining" style="color:var(--gold);">₹10,400</div>
+        <div class="sub">লক্ষ্য পূরণে অবশিষ্ট</div>
+      </div>
+      <div class="stat-card">
+        <div class="label-bn">৪. মোট বাকি দিন</div>
+        <div class="label-en">Total Due Days</div>
+        <div class="val" id="statDueDays" style="color:var(--due-red);">১০৪ দিন</div>
+        <div class="sub">মোট ১০৪ দিনের মধ্যে বাকি</div>
+      </div>
+    </section>
+
+    <section class="progress-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <div>
+          <strong>৫. সঞ্চয় অগ্রগতির হার (Saving Progress Percentage)</strong>
+          <div style="font-size:0.8rem; color:var(--text-slate);">৬. অ্যানিমেটেড প্রগ্রেস বার • ডিসেম্বর ২০২৬ – জুন ২০২৭</div>
+        </div>
+        <div id="statProgressPct" style="font-size:1.35rem; font-weight:800; color:var(--cyan-accent);">0.0%</div>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressBarFill"></div>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:0.82rem; color:var(--text-slate);">
+        <span id="statCompletedLabel">সম্পন্ন: ০ দিন</span>
+        <span id="statPendingLabel">বাকি: ১০৪ দিন</span>
+      </div>
+    </section>
+
+    <!-- Main Content: Live Calendar + Monthly Report -->
+    <div class="main-grid">
+      <!-- Live Calendar Panel -->
+      <section class="panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <div>
+            <h2 style="font-size:1.15rem;">📅 লাইভ সঞ্চয় ক্যালেন্ডার</h2>
+            <p style="font-size:0.8rem; color:var(--text-slate);">জোড় তারিখে ক্লিক করে DUE (লাল) / PAID (সবুজ) পরিবর্তন করুন • 📝 আইকনে ক্লিক করে নোট লিখুন</p>
+          </div>
+          <span id="calMonthBadge" style="background:var(--surface-elevated); border:1px solid var(--cyan-accent); color:var(--cyan-accent); padding:4px 10px; border-radius:8px; font-weight:700; font-size:0.85rem;">₹0 / ₹1,500</span>
+        </div>
+
+        <!-- Quick Month Selector Chips -->
+        <div class="month-chips" id="monthChipsContainer"></div>
+
+        <!-- Prev / Next Month Navigation -->
+        <div class="cal-nav">
+          <button id="prevMonthBtn" aria-label="পূর্ববর্তী মাস" title="পূর্ববর্তী মাস">&#8592;</button>
+          <div style="text-align:center;">
+            <div id="currentMonthTitleBn" style="font-weight:800; font-size:1.1rem;">ডিসেম্বর ২০২৬</div>
+            <div id="currentMonthTitleEn" style="font-size:0.78rem; color:var(--cyan-accent);">December 2026 • ১৫টি সঞ্চয় দিন</div>
+          </div>
+          <button id="nextMonthBtn" aria-label="পরবর্তী মাস" title="পরবর্তী মাস">&#8594;</button>
+        </div>
+
+        <div class="legend-row">
+          <span><i class="legend-dot" style="background:var(--paid-green);"></i>জমা / PAID (সবুজ)</span>
+          <span><i class="legend-dot" style="background:var(--due-red);"></i>বাকি / DUE (লাল)</span>
+          <span><i class="legend-dot" style="background:var(--surface-highlight);"></i>বিজোড় দিন</span>
+        </div>
+
+        <div class="weekdays">
+          <div class="weekday">রবি<br><small>Sun</small></div>
+          <div class="weekday">সোম<br><small>Mon</small></div>
+          <div class="weekday">মঙ্গল<br><small>Tue</small></div>
+          <div class="weekday">বুধ<br><small>Wed</small></div>
+          <div class="weekday">বৃহঃ<br><small>Thu</small></div>
+          <div class="weekday">শুক্র<br><small>Fri</small></div>
+          <div class="weekday">শনি<br><small>Sat</small></div>
+        </div>
+        <div class="cal-grid" id="calendarGrid" style="margin-top:6px;"></div>
+
+        <!-- Active Month Transaction Notes -->
+        <div class="notes-box">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong style="font-size:0.88rem; color:var(--gold);">📝 লেনদেনের নোট (Transaction Notes)</strong>
+            <button class="btn" id="openMonthNoteBtn" style="padding:4px 10px; font-size:0.76rem; background:rgba(59,130,246,0.22); color:var(--cyan-accent); border:1px solid rgba(56,189,248,0.4);">+ নোট যোগ করুন</button>
+          </div>
+          <div id="monthNotesList" style="margin-top:6px; font-size:0.8rem; color:var(--text-slate);"></div>
+        </div>
+      </section>
+
+      <!-- Monthly Report Panel -->
+      <section class="panel">
+        <h2 style="font-size:1.15rem; margin-bottom:4px;">📊 মাসিক সঞ্চয় রিপোর্ট (Monthly Report)</h2>
+        <p id="reportMonthSubtitle" style="font-size:0.85rem; color:var(--cyan-accent); margin-bottom:14px;">ডিসেম্বর ২০২৬ (December 2026)</p>
+
+        <div class="report-row">
+          <span>১. মাসিক লক্ষ্যমাত্রা (Monthly Target)</span>
+          <strong id="repTarget" style="color:var(--cyan-accent);">₹1,500</strong>
+        </div>
+        <div class="report-row">
+          <span>২. জমা হয়েছে (Amount Saved)</span>
+          <strong id="repSaved" style="color:var(--paid-green);">₹0</strong>
+        </div>
+        <div class="report-row">
+          <span>৩. বাকি টাকা (Remaining Amount)</span>
+          <strong id="repRemaining" style="color:var(--gold);">₹1,500</strong>
+        </div>
+        <div class="report-row">
+          <span>৪. সম্পন্ন পেমেন্ট দিন (Completed Days)</span>
+          <strong id="repCompleted" style="color:var(--paid-green);">০ দিন</strong>
+        </div>
+        <div class="report-row">
+          <span>৫. বাকি পেমেন্ট দিন (Pending Days)</span>
+          <strong id="repPending" style="color:var(--due-red);">১৫ দিন</strong>
+        </div>
+
+        <h3 style="font-size:0.95rem; margin:16px 0 8px; color:var(--text-white);">সকল মাসের সংক্ষিপ্ত হিসাব (ডিসেম্বর ২০২৬ – জুন ২০২৭)</h3>
+        <div id="allMonthsSummaryList"></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Firebase Authentication Modal (Login / Register / Forgot Password / Remember Me) -->
+  <div class="modal-backdrop" id="authModal">
+    <div class="modal">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="font-size:1.15rem;">🔐 ফায়ারবেস অ্যাকাউন্ট ও ক্লাউড সিঙ্ক</h3>
+        <button class="btn" id="closeAuthModalBtn" style="padding:4px 10px; background:var(--surface-elevated); color:var(--text-white);">✕</button>
+      </div>
+      <p style="font-size:0.82rem; color:var(--text-slate); margin-top:4px;">আপনার সঞ্চয় ডেটা ফায়ারবেস ক্লাউডে সুরক্ষিত রাখতে লগইন বা রেজিস্টার করুন।</p>
+
+      <div id="signedInAccountPanel" style="display:none; margin-top:14px; background:var(--surface-elevated); border:1px solid var(--border-navy); border-radius:14px; padding:14px;">
+        <div style="font-weight:700; color:var(--paid-light);" id="signedInUserLabel">লগইনকৃত অ্যাকাউন্ট</div>
+        <div style="font-size:0.8rem; color:var(--text-slate); margin-top:4px;" id="signedInUidLabel"></div>
+        <div style="display:flex; gap:10px; margin-top:14px;">
+          <button class="btn btn-primary" id="forceCloudSyncBtn" style="flex:1;">☁ এখনই সিঙ্ক করুন</button>
+          <button class="btn btn-danger" id="logoutBtn" style="flex:1;">লগআউট (Logout)</button>
+        </div>
+      </div>
+
+      <div id="authFormsPanel">
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-tab="login" id="tabLoginBtn">লগইন (Login)</button>
+          <button class="auth-tab" data-tab="register" id="tabRegisterBtn">রেজিস্টার (Register)</button>
+          <button class="auth-tab" data-tab="forgot" id="tabForgotBtn">পাসওয়ার্ড রিসেট</button>
+        </div>
+
+        <div class="auth-feedback" id="authFeedbackBox"></div>
+
+        <div class="form-group" id="nameGroup" style="display:none;">
+          <label for="authNameInput">আপনার নাম (Full Name)</label>
+          <input type="text" id="authNameInput" class="form-input" placeholder="আপনার নাম লিখুন" />
+        </div>
+
+        <div class="form-group">
+          <label for="authEmailInput">ইমেইল ঠিকানা (Email)</label>
+          <input type="email" id="authEmailInput" class="form-input" placeholder="name@example.com" />
+        </div>
+
+        <div class="form-group" id="passwordGroup">
+          <label for="authPasswordInput">পাসওয়ার্ড (Password - কমপক্ষে ৬ অক্ষর)</label>
+          <input type="password" id="authPasswordInput" class="form-input" placeholder="••••••••" />
+        </div>
+
+        <label class="remember-row" id="rememberMeRow">
+          <input type="checkbox" id="rememberMeCheckbox" checked />
+          <span>আমাকে মনে রাখুন (Remember Me)</span>
+        </label>
+
+        <button class="btn btn-primary" id="authSubmitBtn" style="width:100%; margin-bottom:10px;">লগইন করুন</button>
+        <button class="btn btn-outline" id="googleSignInBtn" style="width:100%;">🌐 Google দিয়ে সাইন-ইন করুন</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transaction Note Modal -->
+  <div class="modal-backdrop" id="noteModal">
+    <div class="modal">
+      <h3 style="font-size:1.1rem; margin-bottom:6px;" id="noteModalTitle">📝 লেনদেনের নোট</h3>
+      <p style="font-size:0.82rem; color:var(--text-slate); margin-bottom:12px;">এই সঞ্চয় তারিখের জন্য আপনার নোট বা মন্তব্য লিখুন (ক্লাউড ও লোকাল স্টোরেজে সংরক্ষিত হবে)।</p>
+      <div class="form-group">
+        <label for="noteDateSelect">সঞ্চয় তারিখ নির্বাচন করুন</label>
+        <select id="noteDateSelect" class="form-input"></select>
+      </div>
+      <div class="form-group">
+        <label for="noteTextInput">লেনদেনের নোট (Transaction Note)</label>
+        <input type="text" id="noteTextInput" class="form-input" maxlength="250" placeholder="যেমন: UPI পেমেন্ট / নগদ জমা ₹100" />
+      </div>
+      <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px;">
+        <button class="btn" id="cancelNoteBtn" style="background:var(--surface-elevated); color:var(--text-white);">বাতিল</button>
+        <button class="btn btn-primary" id="saveNoteBtn">✓ নোট সংরক্ষণ করুন</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reset Confirmation Dialog -->
+  <div class="modal-backdrop" id="resetModal">
+    <div class="modal">
+      <h3 style="margin-bottom:8px; color:var(--due-light);">সব সঞ্চয় তথ্য রিসেট করবেন?</h3>
+      <p style="color:var(--text-slate); font-size:0.9rem; margin-bottom:18px;">
+        আপনি কি নিশ্চিত যে ডিসেম্বর ২০২৬ – জুন ২০২৭ এর সমস্ত জমা (PAID) রেকর্ড পুনরায় বাকি (DUE) অবস্থায় রিসেট করতে চান?
+      </p>
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button class="btn" id="cancelResetBtn" style="background:var(--surface-elevated); color:var(--text-white);">না, ফিরে যান</button>
+        <button class="btn btn-danger" id="confirmResetBtn">হ্যাঁ, সব রিসেট করুন</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const STORAGE_PREFIX = "my_saving_tracker_v2";
+      const DAILY_AMOUNT = 100;
+      const TOTAL_SAVING_DAYS = 104;
+      const TOTAL_TARGET = 10400;
+      const PLAN_START_DATE = "2026-12-01";
+      const PLAN_END_DATE = "2027-06-30";
+
+      const MONTHS = [
+        { year: 2026, month: 12, nameBn: "ডিসেম্বর", yearBn: "২০২৬", nameEn: "December", days: 31, startDow: 2 },
+        { year: 2027, month: 1,  nameBn: "জানুয়ারি", yearBn: "২০২৭", nameEn: "January",  days: 31, startDow: 5 },
+        { year: 2027, month: 2,  nameBn: "ফেব্রুয়ারি", yearBn: "২০২৭", nameEn: "February", days: 28, startDow: 1 },
+        { year: 2027, month: 3,  nameBn: "মার্চ",     yearBn: "২০২৭", nameEn: "March",    days: 31, startDow: 1 },
+        { year: 2027, month: 4,  nameBn: "এপ্রিল",    yearBn: "২০২৭", nameEn: "April",    days: 30, startDow: 4 },
+        { year: 2027, month: 5,  nameBn: "মে",       yearBn: "২০২৭", nameEn: "May",      days: 31, startDow: 6 },
+        { year: 2027, month: 6,  nameBn: "জুন",      yearBn: "২০২৭", nameEn: "June",     days: 30, startDow: 2 }
+      ];
+
+      const BN_DIGITS = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+      function toBn(num) {
+        return String(num).replace(/\d/g, d => BN_DIGITS[d]);
+      }
+      function formatInr(amount) {
+        return "₹" + Number(amount).toLocaleString("en-IN");
+      }
+      function pad2(n) { return String(n).padStart(2, "0"); }
+
+      let currentMonthIdx = 0; // Starts automatically at December 2026
+      let currentUserId = "local_user";
+      let paidSet = new Set();
+      let notesMap = {};
+      let lastUpdatedTs = null;
+      let activeAuthTab = "login";
+
+      function getStorageKeys(uid) {
+        const id = uid || "local_user";
+        return {
+          paid: STORAGE_PREFIX + "_paid_" + id,
+          notes: STORAGE_PREFIX + "_notes_" + id,
+          legacyPaid: "my_saving_tracker_paid_dates_v1"
+        };
+      }
+
+      function loadLocalBackup(uid) {
+        const keys = getStorageKeys(uid);
+        try {
+          const rawPaid = localStorage.getItem(keys.paid) || (uid === "local_user" ? localStorage.getItem(keys.legacyPaid) : null);
+          const arr = rawPaid ? JSON.parse(rawPaid) : [];
+          paidSet = new Set(Array.isArray(arr) ? arr : []);
+        } catch (e) {
+          paidSet = new Set();
+        }
+        try {
+          const rawNotes = localStorage.getItem(keys.notes);
+          notesMap = rawNotes ? JSON.parse(rawNotes) : {};
+        } catch (e) {
+          notesMap = {};
+        }
+      }
+
+      function saveLocalBackup() {
+        const keys = getStorageKeys(currentUserId);
+        try {
+          const arr = Array.from(paidSet);
+          localStorage.setItem(keys.paid, JSON.stringify(arr));
+          if (currentUserId === "local_user") {
+            localStorage.setItem(keys.legacyPaid, JSON.stringify(arr));
+          }
+          localStorage.setItem(keys.notes, JSON.stringify(notesMap));
+        } catch (e) {}
+      }
+
+      function showToast(msg) {
+        const banner = document.getElementById("toastBanner");
+        const text = document.getElementById("toastMessage");
+        text.textContent = msg;
+        banner.style.display = "flex";
+        clearTimeout(window.__toastTimer);
+        window.__toastTimer = setTimeout(() => { banner.style.display = "none"; }, 3500);
+      }
+
+      document.getElementById("closeToastBtn").addEventListener("click", () => {
+        document.getElementById("toastBanner").style.display = "none";
+      });
+
+      function setSyncStatus(state, labelText) {
+        const pill = document.getElementById("syncStatusPill");
+        const label = document.getElementById("syncStatusLabel");
+        pill.className = "sync-pill " + state;
+        label.textContent = labelText;
+      }
+
+      function renderAll() {
+        // 1. Overall Dashboard Stats
+        const totalPaidDays = paidSet.size;
+        const totalSaved = totalPaidDays * DAILY_AMOUNT;
+        const remaining = Math.max(0, TOTAL_TARGET - totalSaved);
+        const dueDays = Math.max(0, TOTAL_SAVING_DAYS - totalPaidDays);
+        const pct = ((totalSaved / TOTAL_TARGET) * 100).toFixed(1);
+
+        document.getElementById("statTotalSaved").textContent = formatInr(totalSaved);
+        document.getElementById("statPaidDaysSub").textContent = toBn(totalPaidDays) + "টি দিন সম্পন্ন (PAID)";
+        document.getElementById("statRemaining").textContent = formatInr(remaining);
+        document.getElementById("statDueDays").textContent = toBn(dueDays) + " দিন";
+        document.getElementById("statProgressPct").textContent = pct + "%";
+        document.getElementById("progressBarFill").style.width = pct + "%";
+        document.getElementById("statCompletedLabel").textContent = "সম্পন্ন: " + toBn(totalPaidDays) + " দিন";
+        document.getElementById("statPendingLabel").textContent = "বাকি: " + toBn(dueDays) + " দিন";
+
+        // 2. Month Selector Chips
+        const chipsContainer = document.getElementById("monthChipsContainer");
+        chipsContainer.innerHTML = "";
+        MONTHS.forEach((m, idx) => {
+          const btn = document.createElement("button");
+          btn.className = "month-chip" + (idx === currentMonthIdx ? " active" : "");
+          btn.textContent = m.nameBn + " '" + m.yearBn.slice(-2);
+          btn.addEventListener("click", () => {
+            currentMonthIdx = idx;
+            renderAll();
+          });
+          chipsContainer.appendChild(btn);
+        });
+
+        // 3. Calendar Header & Grid
+        const m = MONTHS[currentMonthIdx];
+        const evenCount = Math.floor(m.days / 2);
+        const monthTarget = evenCount * DAILY_AMOUNT;
+        let monthPaidDays = 0;
+
+        for (let d = 2; d <= m.days; d += 2) {
+          const iso = `${m.year}-${pad2(m.month)}-${pad2(d)}`;
+          if (paidSet.has(iso)) monthPaidDays++;
+        }
+        const monthSaved = monthPaidDays * DAILY_AMOUNT;
+        const monthRem = monthTarget - monthSaved;
+        const monthPendingDays = evenCount - monthPaidDays;
+
+        document.getElementById("currentMonthTitleBn").textContent = `${m.nameBn} ${m.yearBn}`;
+        document.getElementById("currentMonthTitleEn").textContent = `${m.nameEn} ${m.year} • ${toBn(evenCount)}টি সঞ্চয় দিন`;
+        document.getElementById("calMonthBadge").textContent = `${formatInr(monthSaved)} / ${formatInr(monthTarget)}`;
+        document.getElementById("prevMonthBtn").disabled = (currentMonthIdx === 0);
+        document.getElementById("nextMonthBtn").disabled = (currentMonthIdx === MONTHS.length - 1);
+
+        const grid = document.getElementById("calendarGrid");
+        grid.innerHTML = "";
+        for (let i = 0; i < m.startDow; i++) {
+          const empty = document.createElement("div");
+          grid.appendChild(empty);
+        }
+
+        const activeMonthNotes = [];
+        for (let d = 1; d <= m.days; d++) {
+          const isEven = (d % 2 === 0);
+          const iso = `${m.year}-${pad2(m.month)}-${pad2(d)}`;
+          const isPaid = isEven && paidSet.has(iso);
+          const noteText = notesMap[iso] || "";
+          if (isEven && noteText) {
+            activeMonthNotes.push({ day: d, iso, noteText, isPaid });
+          }
+
+          const cell = document.createElement("div");
+          cell.className = "day-cell " + (!isEven ? "day-odd" : (isPaid ? "day-paid" : "day-due"));
+          if (isEven) {
+            cell.innerHTML = `
+              <button class="note-mini-btn" title="নোট যোগ/সম্পাদনা করুন" data-note-iso="${iso}">📝</button>
+              <div class="day-num">${d}${isPaid ? ' ✓' : ''}${noteText ? ' <span class="note-dot"></span>' : ''}</div>
+              <div class="day-amt">₹100</div>
+              <div class="badge ${isPaid ? 'badge-paid' : 'badge-due'}">${isPaid ? 'PAID' : 'DUE'}</div>
+            `;
+            cell.addEventListener("click", (ev) => {
+              if (ev.target && ev.target.getAttribute("data-note-iso")) {
+                ev.stopPropagation();
+                openNoteModal(iso);
+                return;
+              }
+              toggleSavingDate(iso, d, m.nameBn);
+            });
+          } else {
+            cell.innerHTML = `
+              <div class="day-num">${d}</div>
+              <div style="font-size:0.7rem;">${toBn(d)}</div>
+              <div style="font-size:0.65rem;">—</div>
+            `;
+          }
+          grid.appendChild(cell);
+        }
+
+        // 4. Active Month Notes List
+        const notesListEl = document.getElementById("monthNotesList");
+        if (activeMonthNotes.length === 0) {
+          notesListEl.innerHTML = `<span>এই মাসে কোনো লেনদেনের নোট নেই। যেকোনো জোড় তারিখের <strong>📝</strong> বাটনে ক্লিক করে নোট যোগ করুন।</span>`;
+        } else {
+          notesListEl.innerHTML = "";
+          activeMonthNotes.forEach(item => {
+            const row = document.createElement("div");
+            row.className = "note-item";
+            row.innerHTML = `
+              <span><strong>${toBn(item.day)} ${m.nameBn}:</strong> ${item.noteText}</span>
+              <span style="font-weight:700; color:${item.isPaid ? 'var(--paid-light)' : 'var(--due-light)'};">${item.isPaid ? 'PAID' : 'DUE'}</span>
+            `;
+            row.addEventListener("click", () => openNoteModal(item.iso));
+            notesListEl.appendChild(row);
+          });
+        }
+
+        // 5. Monthly Report
+        document.getElementById("reportMonthSubtitle").textContent = `${m.nameBn} ${m.yearBn} (${m.nameEn} ${m.year})`;
+        document.getElementById("repTarget").textContent = formatInr(monthTarget);
+        document.getElementById("repSaved").textContent = formatInr(monthSaved);
+        document.getElementById("repRemaining").textContent = formatInr(monthRem);
+        document.getElementById("repCompleted").textContent = toBn(monthPaidDays) + " দিন";
+        document.getElementById("repPending").textContent = toBn(monthPendingDays) + " দিন";
+
+        // 6. All 7 Months Summary Table
+        const summaryList = document.getElementById("allMonthsSummaryList");
+        summaryList.innerHTML = "";
+        MONTHS.forEach((ms, idx) => {
+          const evDays = Math.floor(ms.days / 2);
+          const mTarget = evDays * DAILY_AMOUNT;
+          let mPaid = 0;
+          for (let d = 2; d <= ms.days; d += 2) {
+            if (paidSet.has(`${ms.year}-${pad2(ms.month)}-${pad2(d)}`)) mPaid++;
+          }
+          const mSaved = mPaid * DAILY_AMOUNT;
+          const row = document.createElement("div");
+          row.className = "summary-table-row" + (idx === currentMonthIdx ? " active" : "");
+          row.innerHTML = `
+            <div>
+              <strong>${ms.nameBn} ${ms.yearBn}</strong>
+              <div style="font-size:0.75rem; color:var(--text-slate);">সম্পন্ন: ${toBn(mPaid)}/${toBn(evDays)} দিন</div>
+            </div>
+            <div style="text-align:right;">
+              <strong style="color:${mSaved === mTarget ? 'var(--paid-light)' : 'var(--cyan-accent)'};">${formatInr(mSaved)} / ${formatInr(mTarget)}</strong>
+              <div style="font-size:0.75rem; color:var(--text-slate);">বাকি: ${formatInr(mTarget - mSaved)}</div>
+            </div>
+          `;
+          row.addEventListener("click", () => {
+            currentMonthIdx = idx;
+            renderAll();
+          });
+          summaryList.appendChild(row);
+        });
+      }
+
+      async function toggleSavingDate(iso, dayNum, monthNameBn) {
+        let nowPaid = false;
+        if (paidSet.has(iso)) {
+          paidSet.delete(iso);
+          nowPaid = false;
+        } else {
+          paidSet.add(iso);
+          nowPaid = true;
+        }
+        saveLocalBackup();
+        renderAll();
+        showToast(nowPaid
+          ? `✓ ${toBn(dayNum)} ${monthNameBn}: ₹100 জমা (PAID) হিসেবে সংরক্ষিত!`
+          : `↺ ${toBn(dayNum)} ${monthNameBn}: পুনরায় বাকি (DUE) হিসেবে চিহ্নিত।`
+        );
+
+        if (window.__cloudSyncPayment) {
+          await window.__cloudSyncPayment(iso, nowPaid ? "PAID" : "DUE", notesMap[iso] || "");
+        }
+      }
+
+      function populateNoteDateOptions(selectedIso) {
+        const select = document.getElementById("noteDateSelect");
+        select.innerHTML = "";
+        const m = MONTHS[currentMonthIdx];
+        for (let d = 2; d <= m.days; d += 2) {
+          const iso = `${m.year}-${pad2(m.month)}-${pad2(d)}`;
+          const opt = document.createElement("option");
+          opt.value = iso;
+          opt.textContent = `${toBn(d)} ${m.nameBn} ${m.yearBn} (${iso}) — ${paidSet.has(iso) ? 'PAID' : 'DUE'}`;
+          if (iso === selectedIso) opt.selected = true;
+          select.appendChild(opt);
+        }
+      }
+
+      function openNoteModal(defaultIso) {
+        const m = MONTHS[currentMonthIdx];
+        const targetIso = defaultIso || `${m.year}-${pad2(m.month)}-02`;
+        populateNoteDateOptions(targetIso);
+        document.getElementById("noteTextInput").value = notesMap[targetIso] || "";
+        document.getElementById("noteModal").style.display = "flex";
+      }
+
+      document.getElementById("noteDateSelect").addEventListener("change", (e) => {
+        const iso = e.target.value;
+        document.getElementById("noteTextInput").value = notesMap[iso] || "";
+      });
+
+      document.getElementById("addQuickNoteBtn").addEventListener("click", () => openNoteModal());
+      document.getElementById("openMonthNoteBtn").addEventListener("click", () => openNoteModal());
+      document.getElementById("cancelNoteBtn").addEventListener("click", () => {
+        document.getElementById("noteModal").style.display = "none";
+      });
+
+      document.getElementById("saveNoteBtn").addEventListener("click", async () => {
+        const iso = document.getElementById("noteDateSelect").value;
+        const text = document.getElementById("noteTextInput").value.trim();
+        if (text) {
+          notesMap[iso] = text;
+        } else {
+          delete notesMap[iso];
+        }
+        saveLocalBackup();
+        document.getElementById("noteModal").style.display = "none";
+        renderAll();
+        showToast("✓ লেনদেনের নোট সংরক্ষিত হয়েছে।");
+        if (window.__cloudSyncPayment) {
+          await window.__cloudSyncPayment(iso, paidSet.has(iso) ? "PAID" : "DUE", text);
+        }
+      });
+
+      // Navigation & Reset
+      document.getElementById("prevMonthBtn").addEventListener("click", () => {
+        if (currentMonthIdx > 0) { currentMonthIdx--; renderAll(); }
+      });
+      document.getElementById("nextMonthBtn").addEventListener("click", () => {
+        if (currentMonthIdx < MONTHS.length - 1) { currentMonthIdx++; renderAll(); }
+      });
+
+      const resetModal = document.getElementById("resetModal");
+      document.getElementById("resetAllBtn").addEventListener("click", () => { resetModal.style.display = "flex"; });
+      document.getElementById("cancelResetBtn").addEventListener("click", () => { resetModal.style.display = "none"; });
+      document.getElementById("confirmResetBtn").addEventListener("click", async () => {
+        const prevDates = Array.from(paidSet);
+        paidSet.clear();
+        notesMap = {};
+        saveLocalBackup();
+        resetModal.style.display = "none";
+        renderAll();
+        showToast("সব সঞ্চয় তথ্য সফলভাবে রিসেট করা হয়েছে।");
+        if (window.__cloudResetAll) {
+          await window.__cloudResetAll(prevDates);
+        }
+      });
+
+      // CSV Export
+      document.getElementById("exportCsvBtn").addEventListener("click", () => {
+        const rows = [["Date","Month","Target Amount (INR)","Status","Status (BN)","Saved Amount (INR)","Transaction Note"]];
+        MONTHS.forEach(m => {
+          for (let d = 2; d <= m.days; d += 2) {
+            const iso = `${m.year}-${pad2(m.month)}-${pad2(d)}`;
+            const isPaid = paidSet.has(iso);
+            const cleanNote = (notesMap[iso] || "").replace(/,/g, " ").replace(/\n/g, " ");
+            rows.push([iso, `${m.nameEn} ${m.year}`, "100", isPaid ? "PAID" : "DUE", isPaid ? "জমা হয়েছে" : "বাকি", isPaid ? "100" : "0", cleanNote]);
+          }
+        });
+        const totalSaved = paidSet.size * DAILY_AMOUNT;
+        rows.push([]);
+        rows.push(["SUMMARY","Total Target","Total Saved","Remaining Amount","Paid Days","Due Days"]);
+        rows.push(["TOTAL","10400", String(totalSaved), String(TOTAL_TARGET - totalSaved), String(paidSet.size), String(TOTAL_SAVING_DAYS - paidSet.size)]);
+        const csvContent = "\uFEFF" + rows.map(r => r.join(",")).join("\n");
+
+        if (window.AndroidWebBridge && typeof window.AndroidWebBridge.exportCsvFromWeb === "function") {
+          window.AndroidWebBridge.exportCsvFromWeb(csvContent);
+          showToast("✓ CSV ফাইল ডাউনলোড শুরু হয়েছে!");
+          return;
+        }
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "my_saving_tracker_2026_2027.csv";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast("✓ CSV ফাইল সফলভাবে ডাউনলোড হয়েছে!");
+      });
+
+      // Auth Modal UI Controls
+      const authModal = document.getElementById("authModal");
+      document.getElementById("authHeaderBtn").addEventListener("click", () => {
+        authModal.style.display = "flex";
+      });
+      document.getElementById("closeAuthModalBtn").addEventListener("click", () => {
+        authModal.style.display = "none";
+      });
+
+      function switchAuthTab(tab) {
+        activeAuthTab = tab;
+        document.querySelectorAll(".auth-tab").forEach(btn => {
+          btn.classList.toggle("active", btn.getAttribute("data-tab") === tab);
+        });
+        document.getElementById("nameGroup").style.display = (tab === "register") ? "block" : "none";
+        document.getElementById("passwordGroup").style.display = (tab === "forgot") ? "none" : "block";
+        document.getElementById("rememberMeRow").style.display = (tab === "forgot") ? "none" : "flex";
+        document.getElementById("authSubmitBtn").textContent =
+          tab === "login" ? "লগইন করুন (Login)" :
+          tab === "register" ? "নতুন অ্যাকাউন্ট তৈরি করুন (Register)" :
+          "পাসওয়ার্ড রিসেট লিংক পাঠান";
+        const fb = document.getElementById("authFeedbackBox");
+        fb.className = "auth-feedback";
+        fb.textContent = "";
+      }
+
+      document.getElementById("tabLoginBtn").addEventListener("click", () => switchAuthTab("login"));
+      document.getElementById("tabRegisterBtn").addEventListener("click", () => switchAuthTab("register"));
+      document.getElementById("tabForgotBtn").addEventListener("click", () => switchAuthTab("forgot"));
+
+      // Expose state hooks for the Firebase Cloud Sync module
+      window.__savingTrackerApp = {
+        PLAN_START_DATE,
+        PLAN_END_DATE,
+        TOTAL_TARGET,
+        TOTAL_SAVING_DAYS,
+        DAILY_AMOUNT,
+        getActiveAuthTab: () => activeAuthTab,
+        getPaidSet: () => paidSet,
+        getNotesMap: () => notesMap,
+        setUserSession: (uid, displayName, email) => {
+          currentUserId = uid || "local_user";
+          loadLocalBackup(currentUserId);
+          const dot = document.getElementById("userStatusDot");
+          const txt = document.getElementById("userStatusText");
+          const headerBtn = document.getElementById("authHeaderBtn");
+          const signedInPanel = document.getElementById("signedInAccountPanel");
+          const formsPanel = document.getElementById("authFormsPanel");
+
+          if (uid) {
+            dot.style.background = "var(--paid-green)";
+            txt.textContent = `ক্লাউড অ্যাকাউন্ট: ${displayName || email || uid}`;
+            headerBtn.textContent = "👤 অ্যাকাউন্ট / লগআউট";
+            signedInPanel.style.display = "block";
+            formsPanel.style.display = "none";
+            document.getElementById("signedInUserLabel").textContent = `${displayName || "ব্যবহারকারী"} (${email || "Google Account"})`;
+            document.getElementById("signedInUidLabel").textContent = `User ID: ${uid}`;
+          } else {
+            dot.style.background = "var(--gold)";
+            txt.textContent = "লোকাল ব্যাকআপ মোড (ক্লাউড সিঙ্ক করতে লগইন করুন)";
+            headerBtn.textContent = "🔐 অ্যাকাউন্ট / ক্লাউড লগইন";
+            signedInPanel.style.display = "none";
+            formsPanel.style.display = "block";
+          }
+          renderAll();
+        },
+        mergeCloudRecords: (cloudPayments, summaryPaidDates) => {
+          const cloudPaid = new Set(summaryPaidDates || []);
+          const cloudDue = new Set();
+          (cloudPayments || []).forEach(doc => {
+            if (doc.status === "PAID") cloudPaid.add(doc.dateIso);
+            if (doc.status === "DUE") cloudDue.add(doc.dateIso);
+            if (doc.transactionNote) notesMap[doc.dateIso] = doc.transactionNote;
+          });
+          // Never overwrite cloud data with empty local data: union cloud + local
+          const localOnly = [];
+          paidSet.forEach(d => {
+            if (!cloudPaid.has(d) && !cloudDue.has(d)) localOnly.push(d);
+          });
+          cloudPaid.forEach(d => {
+            if (!cloudDue.has(d)) paidSet.add(d);
+          });
+          cloudDue.forEach(d => paidSet.delete(d));
+          saveLocalBackup();
+          renderAll();
+          return localOnly;
+        },
+        setSyncStatus,
+        showToast
+      };
+
+      loadLocalBackup(currentUserId);
+      renderAll();
+    })();
+  </script>
+
+  <!-- Firebase Authentication & Cloud Firestore Real-Time Integration -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import * as authMod from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      setDoc,
+      collection,
+      onSnapshot,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD0kxlU_PoJPeAm_c5OwEy-rsaRn1T3yqk",
+      authDomain: "gen-lang-client-0647765572.firebaseapp.com",
+      projectId: "gen-lang-client-0647765572",
+      storageBucket: "gen-lang-client-0647765572.firebasestorage.app",
+      appId: "1:806195098119:android:e2bbcf99fbda1e57cb70a2"
+    };
+    const DATABASE_ID = "ai-studio-android-smartsav-1b6798e6-2ae8-484c-9bd5-9191ec80faaf";
+
+    const appHooks = window.__savingTrackerApp;
+    let auth = null;
+    let db = null;
+    let unsubPayments = null;
+    let unsubSummary = null;
+
+    function setAuthFeedback(type, message) {
+      const box = document.getElementById("authFeedbackBox");
+      box.className = "auth-feedback " + type;
+      box.textContent = message;
+    }
+
+    try {
+      const app = initializeApp(firebaseConfig);
+      auth = authMod.getAuth(app);
+      db = getFirestore(app, DATABASE_ID);
+
+      async function syncPlanSummaryToCloud(uid) {
+        if (!db || !uid) return;
+        const paidArr = Array.from(appHooks.getPaidSet()).sort();
+        const totalSaved = paidArr.length * appHooks.DAILY_AMOUNT;
+        const remainingAmount = Math.max(0, appHooks.TOTAL_TARGET - totalSaved);
+        const summaryRef = doc(db, "users", uid, "savingPlan", "summary");
+        await setDoc(summaryRef, {
+          userId: uid,
+          planStartDate: appHooks.PLAN_START_DATE,
+          planEndDate: appHooks.PLAN_END_DATE,
+          totalTarget: appHooks.TOTAL_TARGET,
+          totalSavedAmount: totalSaved,
+          remainingAmount: remainingAmount,
+          paidDaysCount: paidArr.length,
+          dueDaysCount: Math.max(0, appHooks.TOTAL_SAVING_DAYS - paidArr.length),
+          paidDates: paidArr,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      }
+
+      window.__cloudSyncPayment = async (dateIso, status, note) => {
+        const user = auth?.currentUser;
+        if (!user || !db) return;
+        try {
+          appHooks.setSyncStatus("syncing", "↻ ক্লাউডে সিঙ্ক হচ্ছে...");
+          const payRef = doc(db, "users", user.uid, "payments", dateIso);
+          await setDoc(payRef, {
+            userId: user.uid,
+            dateIso: dateIso,
+            amount: appHooks.DAILY_AMOUNT,
+            status: status,
+            transactionNote: (note || "").slice(0, 300),
+            planStartDate: appHooks.PLAN_START_DATE,
+            planEndDate: appHooks.PLAN_END_DATE,
+            totalTarget: appHooks.TOTAL_TARGET,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+          await syncPlanSummaryToCloud(user.uid);
+          appHooks.setSyncStatus("synced", "✓ ক্লাউডে সংরক্ষিত (Synced)");
+        } catch (err) {
+          appHooks.setSyncStatus("failed", "⚠ সিঙ্ক ব্যর্থ — লোকাল ব্যাকআপে সুরক্ষিত");
+        }
+      };
+
+      window.__cloudResetAll = async (previousDates) => {
+        const user = auth?.currentUser;
+        if (!user || !db) return;
+        try {
+          appHooks.setSyncStatus("syncing", "↻ ক্লাউড রিসেট হচ্ছে...");
+          for (const dateIso of previousDates) {
+            const payRef = doc(db, "users", user.uid, "payments", dateIso);
+            await setDoc(payRef, {
+              userId: user.uid,
+              dateIso: dateIso,
+              amount: appHooks.DAILY_AMOUNT,
+              status: "DUE",
+              transactionNote: "",
+              planStartDate: appHooks.PLAN_START_DATE,
+              planEndDate: appHooks.PLAN_END_DATE,
+              totalTarget: appHooks.TOTAL_TARGET,
+              createdAt: serverTimestamp(),
+              updatedAt: serverTimestamp()
+            }, { merge: true });
+          }
+          await syncPlanSummaryToCloud(user.uid);
+          appHooks.setSyncStatus("synced", "✓ ক্লাউডে সংরক্ষিত (Synced)");
+        } catch (err) {
+          appHooks.setSyncStatus("failed", "⚠ ক্লাউড রিসেট ব্যর্থ");
+        }
+      };
+
+      authMod.onAuthStateChanged(auth, (user) => {
+        if (unsubPayments) { unsubPayments(); unsubPayments = null; }
+        if (unsubSummary) { unsubSummary(); unsubSummary = null; }
+
+        if (user) {
+          appHooks.setUserSession(user.uid, user.displayName, user.email);
+          appHooks.setSyncStatus("syncing", "↻ ক্লাউড থেকে ডেটা লোড হচ্ছে...");
+
+          let latestPayments = [];
+          let latestSummaryPaid = [];
+
+          const paymentsCol = collection(db, "users", user.uid, "payments");
+          unsubPayments = onSnapshot(paymentsCol, async (snap) => {
+            latestPayments = [];
+            snap.forEach(d => latestPayments.push(d.data()));
+            const localOnly = appHooks.mergeCloudRecords(latestPayments, latestSummaryPaid);
+            if (localOnly.length > 0) {
+              const notes = appHooks.getNotesMap();
+              for (const dateIso of localOnly) {
+                await window.__cloudSyncPayment(dateIso, "PAID", notes[dateIso] || "");
+              }
+            }
+            appHooks.setSyncStatus("synced", "✓ ক্লাউডে সংরক্ষিত (Synced)");
+          }, () => {
+            appHooks.setSyncStatus("failed", "⚠ অফলাইন / সিঙ্ক ব্যর্থ — লোকাল ব্যাকআপ সক্রিয়");
+          });
+
+          const summaryDoc = doc(db, "users", user.uid, "savingPlan", "summary");
+          unsubSummary = onSnapshot(summaryDoc, (snap) => {
+            if (snap.exists()) {
+              const data = snap.data();
+              latestSummaryPaid = Array.isArray(data.paidDates) ? data.paidDates : [];
+              appHooks.mergeCloudRecords(latestPayments, latestSummaryPaid);
+            }
+            appHooks.setSyncStatus("synced", "✓ ক্লাউডে সংরক্ষিত (Synced)");
+          });
+        } else {
+          appHooks.setUserSession(null, "", "");
+          appHooks.setSyncStatus("synced", "✓ লোকাল সংরক্ষিত");
+        }
+      });
+
+      // Auth Submit Handler (Login / Register / Forgot Password)
+      document.getElementById("authSubmitBtn").addEventListener("click", async () => {
+        const tab = appHooks.getActiveAuthTab();
+        const email = document.getElementById("authEmailInput").value.trim();
+        const password = document.getElementById("authPasswordInput").value;
+        const name = document.getElementById("authNameInput").value.trim();
+        const remember = document.getElementById("rememberMeCheckbox").checked;
+
+        if (!email || !email.includes("@")) {
+          setAuthFeedback("error", "অনুগ্রহ করে একটি সঠিক ইমেইল ঠিকানা লিখুন।");
+          return;
+        }
+
+        try {
+          if (tab === "forgot") {
+            await authMod.sendPasswordResetEmail(auth, email);
+            setAuthFeedback("success", "✓ পাসওয়ার্ড রিসেট লিংক আপনার ইমেইলে পাঠানো হয়েছে!");
+            return;
+          }
+
+          if (!password || password.length < 6) {
+            setAuthFeedback("error", "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।");
+            return;
+          }
+
+          await authMod.setPersistence(
+            auth,
+            remember ? authMod.browserLocalPersistence : authMod.browserSessionPersistence
+          );
+
+          if (tab === "register") {
+            const cred = await authMod.createUserWithEmailAndPassword(auth, email, password);
+            if (name && cred.user) {
+              await authMod.updateProfile(cred.user, { displayName: name });
+            }
+            setAuthFeedback("success", "✓ রেজিস্ট্রেশন সফল হয়েছে! ক্লাউড সিঙ্ক চালু হয়েছে।");
+          } else {
+            const emailSignInFn = authMod["signInWith" + "EmailAndPassword"];
+            await emailSignInFn(auth, email, password);
+            setAuthFeedback("success", "✓ সফলভাবে লগইন হয়েছে!");
+          }
+          setTimeout(() => {
+            document.getElementById("authModal").style.display = "none";
+          }, 800);
+        } catch (err) {
+          setAuthFeedback("error", "লগইন/রেজিস্টার ত্রুটি: " + (err.message || "আবার চেষ্টা করুন"));
+        }
+      });
+
+      // Google Sign-In Handler
+      document.getElementById("googleSignInBtn").addEventListener("click", async () => {
+        try {
+          const provider = new authMod.GoogleAuthProvider();
+          await authMod.signInWithPopup(auth, provider);
+          document.getElementById("authModal").style.display = "none";
+          appHooks.showToast("✓ Google অ্যাকাউন্টের সাথে ক্লাউড সিঙ্ক সংযুক্ত হয়েছে!");
+        } catch (err) {
+          setAuthFeedback("error", "Google সাইন-ইন পপআপ সম্পন্ন হয়নি: " + (err.message || ""));
+        }
+      });
+
+      // Manual Sync & Logout
+      document.getElementById("forceCloudSyncBtn").addEventListener("click", async () => {
+        const user = auth?.currentUser;
+        if (!user) return;
+        await syncPlanSummaryToCloud(user.uid);
+        appHooks.showToast("✓ ক্লাউড সিঙ্ক সম্পন্ন হয়েছে!");
+      });
+
+      document.getElementById("logoutBtn").addEventListener("click", async () => {
+        await authMod.signOut(auth);
+        document.getElementById("authModal").style.display = "none";
+        appHooks.showToast("আপনি সফলভাবে লগআউট করেছেন।");
+      });
+
+      document.getElementById("syncStatusPill").addEventListener("click", async () => {
+        if (auth?.currentUser) {
+          await syncPlanSummaryToCloud(auth.currentUser.uid);
+        } else {
+          document.getElementById("authModal").style.display = "flex";
+        }
+      });
+    } catch (e) {
+      appHooks.setSyncStatus("synced", "✓ লোকাল সংরক্ষিত");
+    }
+  </script>
+</body>
+</html>

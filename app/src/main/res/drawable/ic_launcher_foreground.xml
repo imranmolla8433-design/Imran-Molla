@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Outer glowing shield ring -->
+    <path
+        android:fillColor="#1D4ED8"
+        android:pathData="M54,22 L80,33 L80,55 C80,72 69,84 54,90 C39,84 28,72 28,55 L28,33 Z" />
+    <path
+        android:fillColor="#0F172A"
+        android:pathData="M54,26 L76,35.5 L76,54.5 C76,69.5 66.5,80 54,85.5 C41.5,80 32,69.5 32,54.5 L32,35.5 Z" />
+    <!-- Emerald coin circle -->
+    <path
+        android:fillColor="#10B981"
+        android:pathData="M54,36 A18,18 0 1,1 53.9,36 Z" />
+    <!-- Stylized Rupee / Check mark inside coin -->
+    <path
+        android:fillColor="#06281E"
+        android:pathData="M46,45 H62 V48 H56 C57,49.5 57.5,51 57,52.5 H62 V55.5 H56.5 C55.5,58.5 52.5,60.5 49,60.5 H48 L56,67 H51.5 L44,60.2 V57.5 H49 C51,57.5 52.5,56.5 53,55.5 H46 V52.5 H53 C52.5,50 51,48 48.5,48 H46 Z" />
+</vector>

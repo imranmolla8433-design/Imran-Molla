@@ -1,0 +1,182 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Default-Deny Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Reusable Hardened Primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidDateIso(dateIso) {
+      return dateIso is string && dateIso.size() == 10 && dateIso.matches('^202[67]-[01][0-9]-[0-3][0-9]$');
+    }
+
+    // Validation Helper 1: SavingPlanSummary
+    function isValidSavingPlanSummary(data, userId) {
+      return data.userId is string &&
+             data.userId.size() >= 1 &&
+             data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.userId == userId &&
+             data.planStartDate is string &&
+             data.planStartDate.size() >= 1 &&
+             data.planStartDate.size() <= 60 &&
+             data.planEndDate is string &&
+             data.planEndDate.size() >= 1 &&
+             data.planEndDate.size() <= 60 &&
+             data.totalTarget is int &&
+             data.totalTarget == 10400 &&
+             data.paidDates is list &&
+             data.paidDates.size() <= 104 &&
+             (data.paidDates.size() == 0 || (data.paidDates[0] is string && data.paidDates[0].size() == 10)) &&
+             data.totalSavedAmount is int &&
+             data.totalSavedAmount >= 0 &&
+             data.totalSavedAmount <= 10400 &&
+             data.remainingAmount is int &&
+             data.remainingAmount >= 0 &&
+             data.remainingAmount <= 10400 &&
+             (data.totalSavedAmount + data.remainingAmount == 10400) &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    // Validation Helper 2: SavingPaymentRecord
+    function isValidSavingPaymentRecord(data, userId, dateIso) {
+      return data.userId is string &&
+             data.userId.size() >= 1 &&
+             data.userId.size() <= 128 &&
+             data.userId == request.auth.uid &&
+             data.userId == userId &&
+             data.dateIso is string &&
+             data.dateIso == dateIso &&
+             isValidDateIso(data.dateIso) &&
+             data.status is string &&
+             (data.status == 'PAID' || data.status == 'DUE') &&
+             data.amount is int &&
+             data.amount == 100 &&
+             data.transactionNote is string &&
+             data.transactionNote.size() <= 300 &&
+             data.planStartDate is string &&
+             data.planStartDate.size() >= 1 &&
+             data.planStartDate.size() <= 60 &&
+             data.planEndDate is string &&
+             data.planEndDate.size() >= 1 &&
+             data.planEndDate.size() <= 60 &&
+             data.totalTarget is int &&
+             data.totalTarget == 10400 &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    // Collection 1: User Saving Plan Summary (/users/{userId}/saving_plans/{planId})
+    match /users/{userId}/saving_plans/{planId} {
+      allow get: if isSignedIn() &&
+                    request.auth.uid == userId &&
+                    isValidId(userId) &&
+                    isValidId(planId);
+
+      allow list: if isSignedIn() &&
+                     request.auth.uid == userId &&
+                     existing().userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       request.auth.uid == userId &&
+                       isValidId(userId) &&
+                       isValidId(planId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'planStartDate', 'planEndDate', 'totalTarget',
+                         'paidDates', 'totalSavedAmount', 'remainingAmount',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'planStartDate', 'planEndDate', 'totalTarget',
+                         'paidDates', 'totalSavedAmount', 'remainingAmount',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidSavingPlanSummary(incoming(), userId);
+
+      allow update: if isSignedIn() &&
+                       isValidSavingPlanSummary(incoming(), userId) &&
+                       request.auth.uid == userId &&
+                       isValidId(userId) &&
+                       isValidId(planId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'paidDates', 'totalSavedAmount', 'remainingAmount', 'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() &&
+                       request.auth.uid == userId &&
+                       isValidId(userId) &&
+                       isValidId(planId);
+    }
+
+    // Collection 2: Individual Saving Payment Records (/users/{userId}/payments/{dateIso})
+    match /users/{userId}/payments/{dateIso} {
+      allow get: if isSignedIn() &&
+                    request.auth.uid == userId &&
+                    isValidId(userId) &&
+                    isValidDateIso(dateIso);
+
+      allow list: if isSignedIn() &&
+                     request.auth.uid == userId &&
+                     existing().userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       request.auth.uid == userId &&
+                       isValidId(userId) &&
+                       isValidDateIso(dateIso) &&
+                       incoming().keys().hasAll([
+                         'userId', 'dateIso', 'status', 'amount', 'transactionNote',
+                         'planStartDate', 'planEndDate', 'totalTarget',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'dateIso', 'status', 'amount', 'transactionNote',
+                         'planStartDate', 'planEndDate', 'totalTarget',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidSavingPaymentRecord(incoming(), userId, dateIso);
+
+      allow update: if isSignedIn() &&
+                       isValidSavingPaymentRecord(incoming(), userId, dateIso) &&
+                       request.auth.uid == userId &&
+                       isValidId(userId) &&
+                       isValidDateIso(dateIso) &&
+                       incoming().userId == existing().userId &&
+                       incoming().dateIso == existing().dateIso &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'status', 'transactionNote', 'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() &&
+                       request.auth.uid == userId &&
+                       isValidId(userId) &&
+                       isValidDateIso(dateIso);
+    }
+  }
+}

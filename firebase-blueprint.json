@@ -1,0 +1,132 @@
+{
+  "entities": {
+    "SavingPlanSummary": {
+      "title": "SavingPlanSummary",
+      "description": "User saving plan summary document storing plan dates, total target, paid dates list, total saved amount, remaining amount, and timestamps.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Authenticated Firebase user UID owning this saving plan."
+        },
+        "planStartDate": {
+          "type": "string",
+          "description": "Saving plan start date (December 2026)."
+        },
+        "planEndDate": {
+          "type": "string",
+          "description": "Saving plan end date (June 2027)."
+        },
+        "totalTarget": {
+          "type": "integer",
+          "description": "Total target saving amount in INR (10400)."
+        },
+        "paidDates": {
+          "type": "array",
+          "description": "Bounded list (max 104) of ISO date strings (YYYY-MM-DD) marked as PAID."
+        },
+        "totalSavedAmount": {
+          "type": "integer",
+          "description": "Total saved amount in INR (0 to 10400)."
+        },
+        "remainingAmount": {
+          "type": "integer",
+          "description": "Remaining saving amount in INR (0 to 10400)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the plan summary was first created via FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the plan summary was last updated via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": [
+        "userId",
+        "planStartDate",
+        "planEndDate",
+        "totalTarget",
+        "paidDates",
+        "totalSavedAmount",
+        "remainingAmount",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "SavingPaymentRecord": {
+      "title": "SavingPaymentRecord",
+      "description": "Individual even-date saving payment record keyed by ISO date (YYYY-MM-DD) to prevent duplicates.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Authenticated Firebase user UID owning this payment record."
+        },
+        "dateIso": {
+          "type": "string",
+          "description": "ISO date string (YYYY-MM-DD) matching the document ID."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["PAID", "DUE"],
+          "description": "Payment status: PAID or DUE."
+        },
+        "amount": {
+          "type": "integer",
+          "description": "Saving amount for this date in INR (100)."
+        },
+        "transactionNote": {
+          "type": "string",
+          "description": "Optional user transaction note for this payment date (up to 300 chars)."
+        },
+        "planStartDate": {
+          "type": "string",
+          "description": "Saving plan start date (December 2026)."
+        },
+        "planEndDate": {
+          "type": "string",
+          "description": "Saving plan end date (June 2027)."
+        },
+        "totalTarget": {
+          "type": "integer",
+          "description": "Total saving plan target in INR (10400)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the payment record was created via FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the payment record was last updated via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": [
+        "userId",
+        "dateIso",
+        "status",
+        "amount",
+        "transactionNote",
+        "planStartDate",
+        "planEndDate",
+        "totalTarget",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/saving_plans/{planId}": {
+      "schema": { "$ref": "#/entities/SavingPlanSummary" },
+      "description": "Stores the user's saving plan summary (Dec 2026 - Jun 2027, ₹10,400 target, total saved, remaining amount, paidDates list, and timestamps)."
+    },
+    "/users/{userId}/payments/{dateIso}": {
+      "schema": { "$ref": "#/entities/SavingPaymentRecord" },
+      "description": "Stores individual saving date records (PAID/DUE status, ₹100 amount, transaction notes, and timestamps) keyed by dateIso."
+    }
+  }
+}

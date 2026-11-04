@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">My Saving Tracker</string>
+    <string name="app_title_bn">মাই সেভিং ট্র্যাকার</string>
+    <string name="app_subtitle_bn">ডিসেম্বর ২০২৬ – জুন ২০২৭ • জোড় তারিখের সঞ্চয় পরিকল্পনা</string>
+    <string name="total_target_label">মোট লক্ষ্যমাত্রা (Total Target)</string>
+    <string name="total_saved_label">মোট জমা (Total Saved)</string>
+    <string name="remaining_amount_label">বাকি টাকা (Remaining)</string>
+    <string name="total_due_days_label">বাকি দিন (Due Days)</string>
+    <string name="saving_progress_label">সঞ্চয়ের অগ্রগতি (Progress)</string>
+    <string name="monthly_report_title">মাসিক রিপোর্ট (Monthly Report)</string>
+    <string name="monthly_target_label">মাসিক লক্ষ্যমাত্রা</string>
+    <string name="monthly_saved_label">মাসিক জমা</string>
+    <string name="monthly_remaining_label">মাসিক বাকি</string>
+    <string name="completed_days_label">সম্পন্ন জমার দিন</string>
+    <string name="pending_days_label">বাকি জমার দিন</string>
+    <string name="export_csv_button">CSV ডাউনলোড / এক্সপোর্ট</string>
+    <string name="reset_data_button">সব তথ্য রিসেট করুন</string>
+    <string name="reset_confirm_title">সব সঞ্চয় তথ্য রিসেট করবেন?</string>
+    <string name="reset_confirm_message">আপনি কি নিশ্চিত যে আপনি সমস্ত জমা (PAID) তারিখের তথ্য মুছে ফেলতে চান? এটি পুনরায় সব জোড় তারিখকে বাকি (DUE) অবস্থায় ফিরিয়ে নেবে।</string>
+    <string name="confirm_yes">হ্যাঁ, রিসেট করুন</string>
+    <string name="confirm_no">না, বাতিল করুন</string>
+    <string name="status_paid">জমা (PAID)</string>
+    <string name="status_due">বাকি (DUE)</string>
+    <string name="prev_month_desc">পূর্ববর্তী মাস (Previous Month)</string>
+    <string name="next_month_desc">পরবর্তী মাস (Next Month)</string>
+</resources>

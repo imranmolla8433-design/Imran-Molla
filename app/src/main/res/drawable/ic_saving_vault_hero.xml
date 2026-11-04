@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="360dp"
+    android:height="160dp"
+    android:viewportWidth="360"
+    android:viewportHeight="160">
+    <!-- Deep Navy & Royal Blue Banner Background -->
+    <path android:pathData="M0,0h360v160h-360z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="0"
+                android:startY="0"
+                android:endX="360"
+                android:endY="160"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#091326" />
+                <item android:offset="0.55" android:color="#132854" />
+                <item android:offset="1.0" android:color="#0F2942" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <!-- Decorative glowing orbs and financial grid waves -->
+    <path
+        android:fillColor="#183B82"
+        android:fillAlpha="0.35"
+        android:pathData="M290,-20 A90,90 0 1,1 289.9,-20 Z" />
+    <path
+        android:fillColor="#10B981"
+        android:fillAlpha="0.14"
+        android:pathData="M320,60 A70,70 0 1,1 319.9,60 Z" />
+    <!-- Upward growth area chart wave -->
+    <path
+        android:fillColor="#38BDF8"
+        android:fillAlpha="0.12"
+        android:pathData="M0,135 Q60,125 115,100 T230,72 T360,30 L360,160 L0,160 Z" />
+    <path
+        android:strokeColor="#38BDF8"
+        android:strokeWidth="2.5"
+        android:strokeAlpha="0.45"
+        android:pathData="M0,135 Q60,125 115,100 T230,72 T360,30" />
+    <!-- Glowing emerald milestone dots -->
+    <path
+        android:fillColor="#10B981"
+        android:pathData="M115,96 A4,4 0 1,1 114.9,96 Z" />
+    <path
+        android:fillColor="#10B981"
+        android:pathData="M230,68 A5,5 0 1,1 229.9,68 Z" />
+    <path
+        android:fillColor="#34D399"
+        android:pathData="M315,44 A6,6 0 1,1 314.9,44 Z" />
+</vector>

@@ -1,0 +1,6 @@
+{
+  "name": "My Saving Tracker",
+  "description": "Premium dark navy and blue Bengali Money Saving Tracker for the Dec 2026 – Jun 2027 even-date ₹100 saving plan (₹10,400 target) with live interactive calendar, monthly reports, local persistence, and CSV export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
